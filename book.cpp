@@ -1,130 +1,63 @@
-#include <iostream>
-#include <fstream>
-#include <set>
 #include <sstream>
-#include <vector>
 #include <iomanip>
-#include <algorithm>
-#include "product.h"
-#include "db_parser.h"
-#include "product_parser.h"
+#include "book.h"
 #include "util.h"
 
 using namespace std;
-struct ProdNameSorter {
-    bool operator()(Product* p1, Product* p2) {
-        return (p1->getName() < p2->getName());
-    }
-};
-void displayProducts(vector<Product*>& hits);
 
-int main(int argc, char* argv[])
+Book::Book(const std::string category, const std::string name, double price, int qty,
+           const std::string isbn, const std::string author): Product::Product(category, name, price, qty),
+           isbn_(isbn),
+           author_(author)
 {
-    if(argc < 2) {
-        cerr << "Please specify a database file" << endl;
-        return 1;
-    }
 
-    /****************
-     * Declare your derived DataStore object here replacing
-     *  DataStore type to your derived type
-     ****************/
-    DataStore ds;
-
-
-
-    // Instantiate the individual section and product parsers we want
-    ProductSectionParser* productSectionParser = new ProductSectionParser;
-    productSectionParser->addProductParser(new ProductBookParser);
-    productSectionParser->addProductParser(new ProductClothingParser);
-    productSectionParser->addProductParser(new ProductMovieParser);
-    UserSectionParser* userSectionParser = new UserSectionParser;
-
-    // Instantiate the parser
-    DBParser parser;
-    parser.addSectionParser("products", productSectionParser);
-    parser.addSectionParser("users", userSectionParser);
-
-    // Now parse the database to populate the DataStore
-    if( parser.parse(argv[1], ds) ) {
-        cerr << "Error parsing!" << endl;
-        return 1;
-    }
-
-    cout << "=====================================" << endl;
-    cout << "Menu: " << endl;
-    cout << "  AND term term ...                  " << endl;
-    cout << "  OR term term ...                   " << endl;
-    cout << "  ADD username search_hit_number     " << endl;
-    cout << "  VIEWCART username                  " << endl;
-    cout << "  BUYCART username                   " << endl;
-    cout << "  QUIT new_db_filename               " << endl;
-    cout << "====================================" << endl;
-
-    vector<Product*> hits;
-    bool done = false;
-    while(!done) {
-        cout << "\nEnter command: " << endl;
-        string line;
-        getline(cin,line);
-        stringstream ss(line);
-        string cmd;
-        if((ss >> cmd)) {
-            if( cmd == "AND") {
-                string term;
-                vector<string> terms;
-                while(ss >> term) {
-                    term = convToLower(term);
-                    terms.push_back(term);
-                }
-                hits = ds.search(terms, 0);
-                displayProducts(hits);
-            }
-            else if ( cmd == "OR" ) {
-                string term;
-                vector<string> terms;
-                while(ss >> term) {
-                    term = convToLower(term);
-                    terms.push_back(term);
-                }
-                hits = ds.search(terms, 1);
-                displayProducts(hits);
-            }
-            else if ( cmd == "QUIT") {
-                string filename;
-                if(ss >> filename) {
-                    ofstream ofile(filename.c_str());
-                    ds.dump(ofile);
-                    ofile.close();
-                }
-                done = true;
-            }
-	    /* Add support for other commands here */
-
-
-
-
-            else {
-                cout << "Unknown command" << endl;
-            }
-        }
-
-    }
-    return 0;
 }
 
-void displayProducts(vector<Product*>& hits)
+Book::~Book()
 {
-    int resultNo = 1;
-    if (hits.begin() == hits.end()) {
-    	cout << "No results found!" << endl;
-    	return;
-    }
-    std::sort(hits.begin(), hits.end(), ProdNameSorter());
-    for(vector<Product*>::iterator it = hits.begin(); it != hits.end(); ++it) {
-        cout << "Hit " << setw(3) << resultNo << endl;
-        cout << (*it)->displayString() << endl;
-        cout << endl;
-        resultNo++;
-    }
+
 }
+
+std::string Book::getISBN() const
+{
+    return isbn_;
+}
+
+std::string Book::getAuthor() const
+{
+    return author_;
+}
+
+set<string> Book::keywords() const
+{
+    set<string> newSet = parseStringToWords(name_);     //Name
+    newSet.insert(isbn_);                                //ISBN
+    set<string> temp = parseStringToWords(author_);
+    newSet = setUnion(newSet,temp);                   //Author Name
+    return newSet;
+}
+
+std::string Book::displayString() const
+{
+    return name_  + "\nAuthor: " + author_ + " ISBN: " + isbn_ + "\n" + doubleToPrice(price_) + " "
+    + to_string(qty_) + " left.";
+}
+
+
+/**
+ * default implementation...can be overriden in a future
+ * assignment
+ */
+bool Book::isMatch(std::vector<std::string>& searchTerms) const
+{
+    return false;
+}
+
+void Book::dump(std::ostream& os) const
+{
+    os << category_ << "\n" << name_ << "\n" << price_ << "\n" << qty_ << "\n" << isbn_ << "\n" << author_ << endl;
+}
+
+
+
+

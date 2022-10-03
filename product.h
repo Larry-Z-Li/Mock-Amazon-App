@@ -32,6 +32,12 @@ public:
     virtual void dump(std::ostream& os) const;
 
     /**
+     * Converts long into price format
+     */
+
+    std::string doubleToPrice(double price) const;
+
+    /**
      * Accessors and mutators
      */
     double getPrice() const;

@@ -18,14 +18,14 @@ std::set<std::string> parseStringToWords(string rawWords)
     rawWords = trim(rawWords);
     std::set<std::string> strings;
     std::string temp;
-    while(!rawWords.empty())															    //Loops by checking if the first character is a space or punctuation.
-                                                                                        // If so, remove the character and add the temporary string into the set.
+    while(!rawWords.empty())															  //Loops by checking if the first character is a space or punctuation.
+                                                                                        //If so, remove the character and add the temporary string into the set.
     {
         if(ispunct(rawWords[0]) || rawWords[0] == ' ')
         {
             if(temp.size() > 1)															//Keywords must be bigger than size 1
             {
-                strings.insert(temp);
+                strings.insert(convToLower(temp));
             }
             else
             {
@@ -42,7 +42,7 @@ std::set<std::string> parseStringToWords(string rawWords)
     }
     if (temp.size() > 1)
     {
-        strings.insert(temp);
+        strings.insert(convToLower(temp));
     }
     return strings;
 }

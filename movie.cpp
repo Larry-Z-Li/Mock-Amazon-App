@@ -31,25 +31,15 @@ std::string Movie::getRating() const
 
 std::set<std::string> Movie::keywords() const
 {
-    std::set<std::string> newSet;
-
-    std::set<std::string> temp = parseStringToWords(name_);   //Words in movie name
-    std::set<std::string>::iterator iter = temp.begin();
-    for(int i = 0; i < temp.size(); i++)
-    {
-        newSet.insert(*iter);
-        iter++;
-    }
-
-    newSet.insert(genre_);                                      //Genre is a keyword
-
+    std::set<std::string> newSet = parseStringToWords(name_);   //Name
+    newSet.insert(convToLower(genre_));                      //Genre
     return newSet;
 }
 
 std::string Movie::displayString() const
 {
-    return "Movie name: " + name_ + ". Price:" + to_string(price_) + ". In stock: " + to_string(qty_)+
-           + ". Genre: " + genre_ + ". Rating: " + rating_  + ".";
+    return name_  + "\nGenre: " + genre_ + " Rating: " + rating_ + "\n" + doubleToPrice(price_) + " "
+           + to_string(qty_) + " left.";
 }
 
 

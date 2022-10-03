@@ -1,4 +1,5 @@
 #include "user.h"
+#include "book.h"
 using namespace std;
 
 User::User() : name_("unknown"), balance_(0.0), type_(1)
@@ -30,6 +31,11 @@ double User::getBalance() const
 void User::deductAmount(double amt)
 {
     balance_ -= amt;
+}
+
+std::vector<Product*> & User::getCart()
+{
+    return cart_;
 }
 
 void User::dump(std::ostream& os)

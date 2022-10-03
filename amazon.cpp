@@ -5,10 +5,13 @@
 #include <vector>
 #include <iomanip>
 #include <algorithm>
+#include <queue>
 #include "product.h"
 #include "db_parser.h"
 #include "product_parser.h"
 #include "util.h"
+#include "mydatastore.h"
+#include "datastore.h"
 
 using namespace std;
 struct ProdNameSorter {
@@ -18,7 +21,15 @@ struct ProdNameSorter {
 };
 void displayProducts(vector<Product*>& hits);
 
-int main(int argc, char* argv[])
+int main1(int argc, char* argv[]);
+
+int main()
+{
+    char* string[] =  {"", "database.txt"};
+    main1(2, string);
+}
+
+int main1(int argc, char* argv[])
 {
     if(argc < 2) {
         cerr << "Please specify a database file" << endl;
@@ -29,7 +40,7 @@ int main(int argc, char* argv[])
      * Declare your derived DataStore object here replacing
      *  DataStore type to your derived type
      ****************/
-    DataStore ds;
+    MyDataStore ds;
 
 
 
@@ -70,46 +81,136 @@ int main(int argc, char* argv[])
         stringstream ss(line);
         string cmd;
         if((ss >> cmd)) {
-            if( cmd == "AND") {
+            if (cmd == "AND") {                             //AND
                 string term;
                 vector<string> terms;
-                while(ss >> term) {
+                while (ss >> term) {
                     term = convToLower(term);
                     terms.push_back(term);
                 }
                 hits = ds.search(terms, 0);
                 displayProducts(hits);
-            }
-            else if ( cmd == "OR" ) {
+            } else if (cmd == "OR") {                       //OR
                 string term;
                 vector<string> terms;
-                while(ss >> term) {
+                while (ss >> term) {
                     term = convToLower(term);
                     terms.push_back(term);
                 }
                 hits = ds.search(terms, 1);
                 displayProducts(hits);
-            }
-            else if ( cmd == "QUIT") {
+            } else if (cmd == "QUIT") {                     //QUIT
                 string filename;
-                if(ss >> filename) {
+                if (ss >> filename) {
                     ofstream ofile(filename.c_str());
                     ds.dump(ofile);
                     ofile.close();
                 }
                 done = true;
             }
-	    /* Add support for other commands here */
-
-
-
-
+            else if (cmd == "ADD") {                        //ADD
+                string userName;
+                int search_hit_number;
+                if (!(ss >> userName)) {
+                    cout << "Invalid request" << endl;
+                }
+                else if (!(ss >> search_hit_number)) {
+                    cout << "Invalid request" << endl;
+                }
+                else if (search_hit_number > hits.size()) {
+                    cout << "Invalid request" << endl;
+                }
+                else
+                {
+                    userName = convToLower(userName);
+                    set<User *>::iterator itr = ds.getUserSet().begin();
+                    while (itr != ds.getUserSet().end()) {                                         //First finds user
+                        if ((*itr)->getName() == userName) {
+                            (*itr)->getCart().push_back(hits.at(search_hit_number - 1));        //Adds into the cart
+                            break;
+                        }
+                        itr++;
+                    }
+                    if (itr == ds.getUserSet().end()) {                                             //User not found
+                        cout << "Invalid request" << endl;
+                    }
+                }
+            }
+            else if ( cmd == "VIEWCART")                  //VIEWCART
+            {
+                string userName;
+                if(!(ss >> userName))
+                {
+                    cout << "Invalid response" << endl;
+                }
+                else
+                {
+                    userName = convToLower(userName);
+                    set<User*>::iterator itr = ds.getUserSet().begin();
+                    while (itr != ds.getUserSet().end())
+                    {
+                        if((*itr)->getName() == userName)                                           //First finds user
+                        {
+                            vector<Product*>::iterator cartItr = (*itr)->getCart().begin();
+                            for(int i = 0; i < (*itr)->getCart().size(); i++)                       //Displays each product
+                            {
+                                cout << to_string(i+1) << ". " << (*cartItr)->getName() << endl;
+                                cartItr++;
+                            }
+                            break;
+                        }
+                        itr++;
+                    }
+                    if(itr == ds.getUserSet().end())                                                //User not found
+                    {
+                        cout << "Invalid response" << endl;
+                    }
+                }
+            }
+            else if ( cmd == "BUYCART")
+            {
+                string userName;
+                if(!(ss >> userName))
+                {
+                    cout << "Invalid response" << endl;
+                }
+                else
+                {
+                    userName = convToLower(userName);
+                    set<User*>::iterator itr = ds.getUserSet().begin();
+                    while (itr != ds.getUserSet().end())
+                    {
+                        if((*itr)->getName() == userName)
+                        {
+                            vector<Product*> cart = (*itr)->getCart();                  //PASS BY VALUE
+                            for(int i = 0; i < cart.size(); i++)                        //Iterating through items in cart
+                            {
+                                //If price is too high or quantity is 0, do nothing
+                                if(cart.front()->getQty() == 0 || cart.front()->getPrice() > (*itr)->getBalance()) {}
+                                else                                                    //Subtract quantity, deduct account amount
+                                {
+                                    cart.front()->subtractQty(1);
+                                    (*itr)->deductAmount(cart.front()->getPrice());
+                                    cart.erase(cart.begin());                   //Erasing first element in cart
+                                }
+                            }
+                            (*itr)->getCart() = cart;                                   //Setting cart to modified value
+                            break;
+                        }
+                        itr++;
+                    }
+                    if(itr == ds.getUserSet().end())
+                    {
+                        cout << "Invalid response" << endl;
+                    }
+                }
+            }
             else {
                 cout << "Unknown command" << endl;
             }
         }
-
     }
+
     return 0;
 }
 
@@ -117,8 +218,8 @@ void displayProducts(vector<Product*>& hits)
 {
     int resultNo = 1;
     if (hits.begin() == hits.end()) {
-    	cout << "No results found!" << endl;
-    	return;
+        cout << "No results found!" << endl;
+        return;
     }
     std::sort(hits.begin(), hits.end(), ProdNameSorter());
     for(vector<Product*>::iterator it = hits.begin(); it != hits.end(); ++it) {

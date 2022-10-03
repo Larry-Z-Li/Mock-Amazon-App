@@ -31,30 +31,16 @@ std::string Clothing::getBrand() const
 
 std::set<std::string> Clothing::keywords() const
 {
-    std::set<std::string> newSet;
-
-    std::set<std::string> temp = parseStringToWords(name_);   //Words in clothing name
-    std::set<std::string>::iterator iter = temp.begin();
-    for(int i = 0; i < temp.size(); i++)
-    {
-        newSet.insert(*iter);
-        iter++;
-    }
-
-    temp = parseStringToWords(brand_);                        //Words in brand name
-    iter = temp.begin();
-    for(int i = 0; i < temp.size(); i++)
-    {
-        newSet.insert(*iter);
-        iter++;
-    }
-    return newSet;                                                 //Size not a keyword
+    std::set<std::string> newSet = parseStringToWords(name_);   //Name
+    std::set<std::string> temp = parseStringToWords(brand_);    //Brand Name
+    newSet = setUnion(newSet,temp);
+    return newSet;
 }
 
 std::string Clothing::displayString() const
 {
-    return "Clothing name: " + name_ + ". Price:" + to_string(price_) + ". In stock: " + to_string(qty_)+
-    + ". Size: " + size_ + ". Brand: " + brand_  + ".";
+    return name_  + "\nSize: " + size_ + " Brand: " + brand_ + "\n" + doubleToPrice(price_) + " "
+           + to_string(qty_) + " left.";
 }
 
 

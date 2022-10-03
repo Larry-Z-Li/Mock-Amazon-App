@@ -2,6 +2,8 @@
 #define USER_H
 #include <iostream>
 #include <string>
+#include "product.h"
+#include <queue>
 
 /**
  * Implements User functionality and information storage
@@ -16,11 +18,13 @@ public:
     double getBalance() const;
     std::string getName() const;
     void deductAmount(double amt);
+    std::vector<Product*>& getCart();
     virtual void dump(std::ostream& os);
 
 private:
     std::string name_;
     double balance_;
     int type_;
+    std::vector<Product*> cart_;
 };
 #endif

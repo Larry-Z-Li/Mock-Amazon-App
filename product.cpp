@@ -48,6 +48,14 @@ bool Product::isMatch(std::vector<std::string>& searchTerms) const
     return false;
 }
 
+
+string Product::doubleToPrice(double price) const
+{
+    string temp = to_string(price);
+    int periodIndex = temp.find(".");
+    return temp.substr(0,periodIndex + 3);
+}
+
 void Product::dump(std::ostream& os) const
 {
     os << category_ << "\n" << name_ << "\n" << price_ << "\n" << qty_ << endl;
