@@ -1,3 +1,6 @@
+book.o
+clothing.o
+movie.o
 amazon
 amazon.o
 db_parser.o
@@ -8,6 +11,3 @@ product.o
 product_parser.o
 user.o
 util.o
-book.o
-clothing.o
-movie.o
