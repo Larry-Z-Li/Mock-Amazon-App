@@ -39,7 +39,7 @@ std::set<std::string> Clothing::keywords() const
 
 std::string Clothing::displayString() const
 {
-    return name_  + "\nSize: " + size_ + " Brand: " + brand_ + "\n" + doubleToPrice(price_) + " "
+    return name_  + "\nSize: " + size_ + " Brand: " + brand_ + "\n" + doubleToPrice(price_) + "  "
            + to_string(qty_) + " left.";
 }
 

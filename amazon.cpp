@@ -21,15 +21,10 @@ struct ProdNameSorter {
 };
 void displayProducts(vector<Product*>& hits);
 
-int main1(int argc, char* argv[]);
 
-int main()
-{
-    char* string[] =  {"", "database.txt"};
-    main1(2, string);
-}
 
-int main1(int argc, char* argv[])
+
+int main(int argc, char *argv[])
 {
     if(argc < 2) {
         cerr << "Please specify a database file" << endl;
@@ -152,10 +147,14 @@ int main1(int argc, char* argv[])
                         if((*itr)->getName() == userName)                                           //First finds user
                         {
                             vector<Product*>::iterator cartItr = (*itr)->getCart().begin();
+                            int itemNum = 1;
                             for(int i = 0; i < (*itr)->getCart().size(); i++)                       //Displays each product
                             {
-                                cout << to_string(i+1) << ". " << (*cartItr)->getName() << endl;
+
+                                cout << "Item "  << itemNum << endl;
+                                cout << (*cartItr)->displayString() << endl;
                                 cartItr++;
+                                itemNum++;
                             }
                             break;
                         }
@@ -163,7 +162,7 @@ int main1(int argc, char* argv[])
                     }
                     if(itr == ds.getUserSet().end())                                                //User not found
                     {
-                        cout << "Invalid response" << endl;
+                        cout << "Invalid username" << endl;
                     }
                 }
             }
@@ -180,28 +179,30 @@ int main1(int argc, char* argv[])
                     set<User*>::iterator itr = ds.getUserSet().begin();
                     while (itr != ds.getUserSet().end())
                     {
-                        if((*itr)->getName() == userName)
+                        if((*itr)->getName() == userName)                               //Found user
                         {
-                            vector<Product*> cart = (*itr)->getCart();                  //PASS BY VALUE
-                            for(int i = 0; i < cart.size(); i++)                        //Iterating through items in cart
+                            vector<Product*>::iterator cartItr = (*itr)->getCart().begin();
+                            while(cartItr != (*itr)->getCart().end())                   //Iterating through items in cart
                             {
                                 //If price is too high or quantity is 0, do nothing
-                                if(cart.front()->getQty() == 0 || cart.front()->getPrice() > (*itr)->getBalance()) {}
+                                if((*cartItr)->getQty() == 0 || (*cartItr)->getPrice() > (*itr)->getBalance())
+                                {
+                                    cartItr++;
+                                }
                                 else                                                    //Subtract quantity, deduct account amount
                                 {
-                                    cart.front()->subtractQty(1);
-                                    (*itr)->deductAmount(cart.front()->getPrice());
-                                    cart.erase(cart.begin());                   //Erasing first element in cart
+                                    (*cartItr)->subtractQty(1);
+                                    (*itr)->deductAmount((*cartItr)->getPrice());
+                                    (*itr)->getCart().erase(cartItr);           //iterator will point to next item
                                 }
                             }
-                            (*itr)->getCart() = cart;                                   //Setting cart to modified value
                             break;
                         }
                         itr++;
                     }
                     if(itr == ds.getUserSet().end())
                     {
-                        cout << "Invalid response" << endl;
+                        cout << "Invalid username" << endl;
                     }
                 }
             }

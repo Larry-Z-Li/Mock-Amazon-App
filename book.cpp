@@ -39,7 +39,7 @@ set<string> Book::keywords() const
 
 std::string Book::displayString() const
 {
-    return name_  + "\nAuthor: " + author_ + " ISBN: " + isbn_ + "\n" + doubleToPrice(price_) + " "
+    return name_  + "\nAuthor: " + author_ + " ISBN: " + isbn_ + "\n" + doubleToPrice(price_) + "  "
     + to_string(qty_) + " left.";
 }
 

@@ -73,18 +73,18 @@ vector<Product*> MyDataStore::search(vector<string> &terms, int type)
 void MyDataStore::dump(std::ostream &ofile)
 {
     ofile << "<products>" << endl;
-    set<Product*>::iterator productItr = productSet.begin();
-    while(productItr != productSet.end())
+    while(!productSet.empty())
     {
-        (*productItr)->dump(ofile);
-        productItr++;
+        (*productSet.begin())->dump(ofile);
+        delete (*productSet.begin());
+        productSet.erase(productSet.begin());
     }
     ofile << "</products>\n<users>" << endl;
-    set<User*>::iterator userItr = userSet.begin();
-    while(userItr != userSet.end())
+    while(!userSet.empty())
     {
-        (*userItr)->dump(ofile);
-        userItr++;
+        (*userSet.begin())->dump(ofile);
+        delete (*userSet.begin());
+        userSet.erase(userSet.begin());
     }
     ofile << "</users>";
 }
